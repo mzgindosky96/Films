@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Admin Panel - BadiniMovies | Firebase Firestore</title>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // ======================= FIREBASE CONFIGURATION =======================
+        // 🔥 REPLACE THIS OBJECT WITH YOUR OWN FIREBASE PROJECT CONFIGURATION 🔥
+        // Go to Firebase Console → Project Settings → General → Your apps → SDK setup and config
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6WMZGUS8s1FufWdCefsv-5mAIYhhkKgY",
+            authDomain: "moviesite-admin-c178b.firebaseapp.com",
+            projectId: "moviesite-admin-c178b",
+            storageBucket: "moviesite-admin-c178b.appspot.com",
+            messagingSenderId: "275418486999",
+            appId: "1:275418486999:web:845bd57e7a014e7393b892"
+        };
+        
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const moviesCollection = collection(db, "movies");
+        
+        // Global array to cache movies
+        let moviesArray = [];
+        
+        // Helper: Load movies from Firestore
+        async function loadMoviesFromFirestore() {
+            try {
+                const q = query(moviesCollection, orderBy("title_en", "asc"));
+                const querySnapshot = await getDocs(q);
+                moviesArray = [];
+                querySnapshot.forEach((docSnap) => {
+                    moviesArray.push({
+                        movie_id: docSnap.id,
+                        ...docSnap.data()
+                    });
+                });
+                renderMoviesTable();
+                return true;
+            } catch (error) {
+                console.error("Firestore load error:", error);
+                showStatus("❌ Failed to load movies from Firebase. Check console & Firestore rules.", "error");
+                return false;
+            }
+        }
+        
+        // Add movie to Firestore
+        async function addMovieToFirestore(movieData) {
+            try {
+                const docRef = await addDoc(moviesCollection, {
+                    title_en: movieData.title_en,
+                    title_ar: movieData.title_ar,
+                    year: movieData.year,
+                    lang: movieData.lang,
+                    poster_url: movieData.poster_url,
+                    description_en: movieData.description_en || "",
+                    description_ar: movieData.description_ar || "",
+                    servers: movieData.servers || [],
+                    createdAt: new Date().toISOString()
+                });
+                showStatus("✅ Movie added successfully! (Firestore)", "success");
+                await loadMoviesFromFirestore();
+                return true;
+            } catch (error) {
+                console.error("Add error:", error);
+                showStatus("Firestore error: " + error.message, "error");
+                return false;
+            }
+        }
+        
+        // Update movie in Firestore
+        async function updateMovieInFirestore(movieId, updatedData) {
+            try {
+                const movieDoc = doc(db, "movies", movieId);
+                await updateDoc(movieDoc, {
+                    title_en: updatedData.title_en,
+                    title_ar: updatedData.title_ar,
+                    year: updatedData.year,
+                    lang: updatedData.lang,
+                    poster_url: updatedData.poster_url,
+                    description_en: updatedData.description_en,
+                    description_ar: updatedData.description_ar,
+                    servers: updatedData.servers,
+                    updatedAt: new Date().toISOString()
+                });
+                showStatus("✏️ Movie updated successfully in Firestore", "info");
+                await loadMoviesFromFirestore();
+                return true;
+            } catch (error) {
+                console.error("Update error:", error);
+                showStatus("Update failed: " + error.message, "error");
+                return false;
+            }
+        }
+        
+        // Delete movie from Firestore
+        async function deleteMovieFromFirestore(movieId) {
+            if (!confirm("⚠️ Permanently delete this movie from Firebase? Action cannot be undone.")) return false;
+            try {
+                const movieDoc = doc(db, "movies", movieId);
+                await deleteDoc(movieDoc);
+                showStatus("🗑️ Movie deleted from Firestore", "warning");
+                await loadMoviesFromFirestore();
+                return true;
+            } catch (error) {
+                console.error("Delete error:", error);
+                showStatus("Delete failed: " + error.message, "error");
+                return false;
+            }
+        }
+        
+        // ---------- UI RENDER & HELPERS (no localStorage anymore) ----------
+        function renderMoviesTable() {
+            const tbody = document.getElementById('moviesTableBody');
+            if (!tbody) return;
+            if (!moviesArray.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">📭 No movies found. Add your first movie above.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            moviesArray.forEach(movie => {
+                const row = tbody.insertRow();
+                // Poster
+                const posterCell = row.insertCell(0);
+                const posterImg = document.createElement('img');
+                posterImg.src = movie.poster_url || 'https://via.placeholder.com/45x60?text=No+Poster';
+                posterImg.alt = movie.title_en;
+                posterImg.className = 'movie-poster-preview';
+                posterImg.onerror = () => { posterImg.src = 'https://via.placeholder.com/45x60?text=Error'; };
+                posterCell.appendChild(posterImg);
+                
+                // Titles
+                const titleCell = row.insertCell(1);
+                titleCell.innerHTML = `<strong>${escapeHtml(movie.title_en)}</strong><br><span style="font-size:0.8rem;color:#cbc3ff;">${escapeHtml(movie.title_ar)}</span>`;
+                
+                // Year
+                const yearCell = row.insertCell(2);
+                yearCell.textContent = movie.year || '—';
+                
+                // Language
+                const langCell = row.insertCell(3);
+                langCell.textContent = (movie.lang || 'both').toUpperCase();
+                
+                // Actions (Update + Delete)
+                const actionsCell = row.insertCell(4);
+                actionsCell.className = 'action-buttons';
+                
+                const updateBtn = document.createElement('button');
+                updateBtn.textContent = '✏️ Update';
+                updateBtn.className = 'update-btn';
+                updateBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditPanel(movie.movie_id);
+                });
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '🗑️ Delete';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.addEventListener('click', () => {
+                    deleteMovieFromFirestore(movie.movie_id);
+                });
+                
+                actionsCell.appendChild(updateBtn);
+                actionsCell.appendChild(deleteBtn);
+            });
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function showStatus(msg, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            if (!statusDiv) return;
+            statusDiv.textContent = msg;
+            statusDiv.style.background = type === 'error' ? '#b91c1c40' : (type === 'success' ? '#2e7d6440' : '#2c6e9e40');
+            statusDiv.style.borderLeft = `4px solid ${type === 'error' ? '#b91c1c' : (type === 'success' ? '#3ba776' : '#e4b363')}`;
+            statusDiv.classList.add('show');
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Collect servers from add form (used for both add/edit)
+        function collectServersFromAdd() {
+            const servers = [];
+            const s1url = document.getElementById('server1_url').value.trim();
+            if (s1url) {
+                servers.push({ label: document.getElementById('server1_label').value.trim() || 'Server 1', url: s1url, icon: 'fa-server' });
+            }
+            const s2url = document.getElementById('server2_url').value.trim();
+            if (s2url) {
+                servers.push({ label: document.getElementById('server2_label').value.trim() || 'Server 2', url: s2url, icon: 'fa-server' });
+            }
+            const s3url = document.getElementById('server3_url').value.trim();
+            if (s3url) {
+                servers.push({ label: document.getElementById('server3_label').value.trim() || 'Server 3', url: s3url, icon: 'fa-server' });
+            }
+            return servers;
+        }
+        
+        function collectServersFromEdit() {
+            const servers = [];
+            const s1url = document.getElementById('edit_server1_url').value.trim();
+            if (s1url) servers.push({ label: document.getElementById('edit_server1_label').value.trim() || 'Server 1', url: s1url, icon: 'fa-server' });
+            const s2url = document.getElementById('edit_server2_url').value.trim();
+            if (s2url) servers.push({ label: document.getElementById('edit_server2_label').value.trim() || 'Server 2', url: s2url, icon: 'fa-server' });
+            const s3url = document.getElementById('edit_server3_url').value.trim();
+            if (s3url) servers.push({ label: document.getElementById('edit_server3_label').value.trim() || 'Server 3', url: s3url, icon: 'fa-server' });
+            return servers;
+        }
+        
+        // ADD handler
+        async function handleAddSubmit(e) {
+            e.preventDefault();
+            const title_en = document.getElementById('title_en').value.trim();
+            const title_ar = document.getElementById('title_ar').value.trim();
+            const year = document.getElementById('year').value.trim();
+            const lang = document.getElementById('lang').value;
+            const poster_url = document.getElementById('poster_url').value.trim();
+            const description_en = document.getElementById('description_en').value;
+            const description_ar = document.getElementById('description_ar').value;
+            const servers = collectServersFromAdd();
+            
+            if (!title_en || !title_ar || !year || !poster_url) {
+                showStatus('Please fill all required fields: titles, year & poster URL.', 'error');
+                return;
+            }
+            if (servers.length === 0) {
+                showStatus('At least one streaming server URL is required.', 'error');
+                return;
+            }
+            
+            const newMovie = { title_en, title_ar, year, lang, poster_url, description_en, description_ar, servers };
+            await addMovieToFirestore(newMovie);
+            // reset add form but keep basic default
+            document.getElementById('addMovieForm').reset();
+            document.getElementById('server1_label').value = 'Server 1';
+            document.getElementById('server2_label').value = 'Server 2';
+            document.getElementById('server3_label').value = 'Server 3';
+        }
+        
+        // Open edit panel & fill with Firestore data
+        function openEditPanel(movieId) {
+            const movie = moviesArray.find(m => m.movie_id === movieId);
+            if (!movie) return;
+            
+            const editPanel = document.getElementById('editPanel');
+            document.getElementById('edit_movie_id').value = movie.movie_id;
+            document.getElementById('edit_title_en').value = movie.title_en || '';
+            document.getElementById('edit_title_ar').value = movie.title_ar || '';
+            document.getElementById('edit_year').value = movie.year || '';
+            document.getElementById('edit_lang').value = movie.lang || 'both';
+            document.getElementById('edit_poster_url').value = movie.poster_url || '';
+            document.getElementById('edit_description_en').value = movie.description_en || '';
+            document.getElementById('edit_description_ar').value = movie.description_ar || '';
+            
+            // reset server fields
+            const serverFields = [
+                { urlInput: 'edit_server1_url', labelInput: 'edit_server1_label' },
+                { urlInput: 'edit_server2_url', labelInput: 'edit_server2_label' },
+                { urlInput: 'edit_server3_url', labelInput: 'edit_server3_label' }
+            ];
+            serverFields.forEach(f => {
+                document.getElementById(f.urlInput).value = '';
+                document.getElementById(f.labelInput).value = '';
+            });
+            
+            const servers = movie.servers || [];
+            servers.forEach((sv, idx) => {
+                if (idx < serverFields.length) {
+                    document.getElementById(serverFields[idx].urlInput).value = sv.url || '';
+                    document.getElementById(serverFields[idx].labelInput).value = sv.label || '';
+                }
+            });
+            
+            editPanel.style.display = 'block';
+            editPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function closeEditPanel() {
+            document.getElementById('editPanel').style.display = 'none';
+            document.getElementById('updateMovieForm').reset();
+        }
+        
+        async function handleUpdateSubmit(e) {
+            e.preventDefault();
+            const movieId = document.getElementById('edit_movie_id').value;
+            const updatedServers = collectServersFromEdit();
+            if (updatedServers.length === 0) {
+                showStatus('❌ At least one server URL is required for update.', 'error');
+                return;
+            }
+            const updatedData = {
+                title_en: document.getElementById('edit_title_en').value.trim(),
+                title_ar: document.getElementById('edit_title_ar').value.trim(),
+                year: document.getElementById('edit_year').value.trim(),
+                lang: document.getElementById('edit_lang').value,
+                poster_url: document.getElementById('edit_poster_url').value.trim(),
+                description_en: document.getElementById('edit_description_en').value,
+                description_ar: document.getElementById('edit_description_ar').value,
+                servers: updatedServers
+            };
+            if (!updatedData.title_en || !updatedData.title_ar || !updatedData.year || !updatedData.poster_url) {
+                showStatus('Please fill all required fields (titles, year, poster).', 'error');
+                return;
+            }
+            const success = await updateMovieInFirestore(movieId, updatedData);
+            if (success) {
+                closeEditPanel();
+            }
+        }
+        
+        // ---------- SIMPLE AUTH (admin / your_secure_password) ----------
+        function showLoginScreen() {
+            const loginHtml = `
+            <div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0c0b14; z-index:2000; display:flex; align-items:center; justify-content:center;">
+                <div style="background:#1a1728; padding:2rem; border-radius:36px; width:360px; text-align:center; box-shadow: 0 20px 35px rgba(0,0,0,0.5);">
+                    <h2 style="margin-bottom: 20px;">🔐 Admin Access</h2>
+                    <form id="adminLoginForm">
+                        <input type="text" id="loginUsername" placeholder="Username" style="margin:12px 0; width:100%;" required>
+                        <input type="password" id="loginPassword" placeholder="Password" style="margin:12px 0; width:100%;" required>
+                        <button type="submit" style="width:100%; margin-top:8px; background:#e4b363;">Login</button>
+                        <p id="loginError" style="color:#ff8a7a; margin-top:12px;"></p>
+                    </form>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', loginHtml);
+            const loginForm = document.getElementById('adminLoginForm');
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const user = document.getElementById('loginUsername').value;
+                const pass = document.getElementById('loginPassword').value;
+                if (user === 'admin' && pass === 'your_secure_password') {
+                    localStorage.setItem('admin_auth_fake', 'logged_in');
+                    document.getElementById('loginOverlay').remove();
+                    initAdminApp();
+                } else {
+                    document.getElementById('loginError').innerText = 'Invalid credentials';
+                }
+            });
+        }
+        
+        function checkAuth() {
+            const auth = localStorage.getItem('admin_auth_fake');
+            if (auth !== 'logged_in') {
+                showLoginScreen();
+                return false;
+            }
+            return true;
+        }
+        
+        function handleLogout() {
+            if (confirm('Log out from admin panel?')) {
+                localStorage.removeItem('admin_auth_fake');
+                showLoginScreen();
+                // reset UI contents optionally
+                document.getElementById('moviesTableBody').innerHTML = '<tr><td colspan="5">Please login again...</td></tr>';
+                document.getElementById('editPanel').style.display = 'none';
+            }
+        }
+        
+        async function initAdminApp() {
+            await loadMoviesFromFirestore();
+            attachEventListeners();
+        }
+        
+        function attachEventListeners() {
+            const addForm = document.getElementById('addMovieForm');
+            if (addForm) addForm.removeEventListener('submit', handleAddSubmit);
+            if (addForm) addForm.addEventListener('submit', handleAddSubmit);
+            
+            const updateForm = document.getElementById('updateMovieForm');
+            if (updateForm) updateForm.removeEventListener('submit', handleUpdateSubmit);
+            if (updateForm) updateForm.addEventListener('submit', handleUpdateSubmit);
+            
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            if (cancelBtn) cancelBtn.removeEventListener('click', closeEditPanel);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeEditPanel);
+            
+            const logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) logoutBtn.removeEventListener('click', handleLogout);
+            if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+        }
+        
+        // start app after DOM ready
+        window.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                initAdminApp();
+            } else {
+                // login will handle init
+                const interval = setInterval(() => {
+                    if (localStorage.getItem('admin_auth_fake') === 'logged_in') {
+                        clearInterval(interval);
+                        initAdminApp();
+                    }
+                }, 200);
+            }
+        });
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0c0b14;
+            color: #f0eef7;
+            font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #1a1728;
+            padding: 28px 32px;
+            border-radius: 32px;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.5);
+        }
+        .logout-btn {
+            float: right;
+            background: #4b446b;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #6b5b95;
+            transform: translateY(-2px);
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin-bottom: 8px;
+            display: inline-block;
+            background: linear-gradient(135deg, #e4b363, #ffd966);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        h2 {
+            margin: 28px 0 16px 0;
+            font-size: 1.6rem;
+            border-left: 4px solid #e4b363;
+            padding-left: 16px;
+        }
+        h3 {
+            margin: 20px 0 8px 0;
+            font-size: 1.2rem;
+            color: #cbc3ff;
+        }
+        .form-grid {
+            background: #0f0d1c;
+            padding: 20px 24px;
+            border-radius: 28px;
+            margin-bottom: 10px;
+        }
+        input, textarea, select {
+            width: 100%;
+            margin: 8px 0 16px 0;
+            padding: 12px 14px;
+            border-radius: 20px;
+            border: 1px solid #342f4e;
+            background: #2f2b45;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #e4b363;
+            box-shadow: 0 0 0 2px rgba(228, 179, 99, 0.3);
+        }
+        button {
+            background: #e4b363;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            color: #1a1728;
+        }
+        button:hover {
+            background: #f3c26b;
+            transform: scale(1.02);
+        }
+        .server-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .server-row input {
+            flex: 1;
+            margin-bottom: 12px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 20px;
+            background: #0f0d1c;
+            padding: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #342f4e;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #211d35;
+            color: #e4b363;
+        }
+        tr:hover {
+            background-color: #25213b;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .delete-btn {
+            background: #b91c1c;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+        }
+        .update-btn {
+            background: #2c6e9e;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+        }
+        .delete-btn:hover { background: #e03a3a; }
+        .update-btn:hover { background: #3d8bc2; }
+        .movie-poster-preview {
+            width: 45px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #00000040;
+        }
+        .status-msg {
+            padding: 12px;
+            border-radius: 28px;
+            margin: 12px 0;
+            background: #2a253f;
+            display: none;
+        }
+        .status-msg.show {
+            display: block;
+        }
+        .edit-panel {
+            background: #1b172b;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e4b36340;
+        }
+        .close-edit {
+            background: #4b446b;
+            margin-left: 12px;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 18px; }
+            .server-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="appContainer">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <h1>🎬 BadiniMovies · Firestore Admin</h1>
+        <button id="logoutButton" class="logout-btn">🚪 Logout</button>
+    </div>
+    
+    <div id="statusMessage" class="status-msg"></div>
+    
+    <h2>➕ Add New Movie</h2>
+    <div class="form-grid">
+        <form id="addMovieForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <input type="text" id="title_en" placeholder="Title (English) *" required>
+                <input type="text" id="title_ar" placeholder="Title (Arabic) *" required>
+                <input type="text" id="year" placeholder="Year (ex: 2024) *" required>
+                <select id="lang" required>
+                    <option value="both">Both (EN/AR)</option>
+                    <option value="en">English</option>
+                    <option value="ar">Arabic</option>
+                </select>
+            </div>
+            <input type="url" id="poster_url" placeholder="Poster URL (https://...) *" required>
+            <textarea id="description_en" rows="2" placeholder="Description (English)"></textarea>
+            <textarea id="description_ar" rows="2" placeholder="Description (Arabic)"></textarea>
+            <h3>📡 Servers (at least one required)</h3>
+            <div id="serversContainer">
+                <div class="server-row"><input type="url" id="server1_url" placeholder="Server 1 URL" required><input type="text" id="server1_label" placeholder="Label" value="Server 1"></div>
+                <div class="server-row"><input type="url" id="server2_url" placeholder="Server 2 URL (optional)"><input type="text" id="server2_label" placeholder="Label" value="Server 2"></div>
+                <div class="server-row"><input type="url" id="server3_url" placeholder="Server 3 URL (optional)"><input type="text" id="server3_label" placeholder="Label" value="Server 3"></div>
+            </div>
+            <button type="submit">✨ Add Movie (Firestore)</button>
+        </form>
+    </div>
+    
+    <div id="editPanel" class="edit-panel" style="display: none;">
+        <h3>✏️ Update Movie (Firestore)</h3>
+        <form id="updateMovieForm">
+            <input type="hidden" id="edit_movie_id">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <input type="text" id="edit_title_en" placeholder="Title (English)" required>
+                <input type="text" id="edit_title_ar" placeholder="Title (Arabic)" required>
+                <input type="text" id="edit_year" placeholder="Year" required>
+                <select id="edit_lang"><option value="both">Both</option><option value="en">English</option><option value="ar">Arabic</option></select>
+            </div>
+            <input type="url" id="edit_poster_url" placeholder="Poster URL" required>
+            <textarea id="edit_description_en" rows="2" placeholder="Description (English)"></textarea>
+            <textarea id="edit_description_ar" rows="2" placeholder="Description (Arabic)"></textarea>
+            <h3>🔄 Edit Servers</h3>
+            <div class="server-row"><input type="url" id="edit_server1_url" placeholder="Server 1 URL"><input type="text" id="edit_server1_label" placeholder="Label"></div>
+            <div class="server-row"><input type="url" id="edit_server2_url" placeholder="Server 2 URL"><input type="text" id="edit_server2_label" placeholder="Label"></div>
+            <div class="server-row"><input type="url" id="edit_server3_url" placeholder="Server 3 URL"><input type="text" id="edit_server3_label" placeholder="Label"></div>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button type="submit">💾 Save Changes to Firebase</button>
+                <button type="button" id="cancelEditBtn" class="close-edit">❌ Cancel</button>
+            </div>
+        </form>
+    </div>
+    
+    <h2>📋 Movies from Firestore</h2>
+    <div class="table-wrapper">
+        <table id="moviesTable">
+            <thead><tr><th>Poster</th><th>Title (EN/AR)</th><th>Year</th><th>Lang</th><th>Actions</th></tr></thead>
+            <tbody id="moviesTableBody"><tr><td colspan="5" style="text-align:center;">Loading movies from Firebase...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
