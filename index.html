@@ -3,636 +3,657 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 RetroStation · PS2 online</title>
-    <!-- Font Awesome for icons -->
+    <title>🎮 RetroStation · PS2 Emulator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-
         body {
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            background: #0b0e14;
-            color: #eaeef2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #e0e8f0;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 1.5rem;
-            background-image: radial-gradient(circle at 20% 30%, #1a232e 0%, #0a0d12 90%);
-        }
-
-        .retro-card {
-            max-width: 1100px;
-            width: 100%;
-            background: rgba(18, 24, 33, 0.85);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border-radius: 2.5rem;
-            padding: 2rem 2rem 2.5rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 215, 0, 0.15);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            transition: all 0.2s;
-        }
-
-        h1 {
-            display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            font-size: 2.2rem;
-            margin-bottom: 0.25rem;
-            color: #f6e9b2;
-            text-shadow: 0 0 8px #ffb34740;
+            padding: 20px;
+            background-image: radial-gradient(ellipse at center, #141e2b 0%, #070b11 100%);
         }
-
-        h1 i {
-            color: #f5c542;
-            filter: drop-shadow(0 0 6px #f5a623);
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(14, 20, 30, 0.92);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255, 200, 50, 0.1);
+            border: 1px solid rgba(255, 200, 50, 0.08);
         }
-
-        .subhead {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 1px dashed #3a4555;
-            padding-bottom: 0.75rem;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #1e2a3a;
+            padding-bottom: 15px;
         }
-
-        .subhead span {
-            opacity: 0.7;
-            font-size: 0.95rem;
-            background: #1f2a36;
-            padding: 0.3rem 1rem;
-            border-radius: 30px;
-            border: 1px solid #3e4b5e;
-        }
-
-        .upload-area {
-            background: #121a24;
-            border-radius: 2rem;
-            padding: 1.8rem 1.5rem;
-            margin-bottom: 2.2rem;
-            border: 2px dashed #4d5e74;
-            transition: 0.2s;
-            text-align: center;
-            box-shadow: inset 0 0 10px #00000055;
-        }
-
-        .upload-area:hover {
-            border-color: #eab543;
-            background: #18212e;
-        }
-
-        .upload-area label {
-            display: inline-block;
-            background: #eab543;
-            color: #121a24;
+        .header h1 {
+            font-size: 28px;
             font-weight: 600;
-            padding: 0.8rem 2.2rem;
-            border-radius: 60px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.15s;
-            box-shadow: 0 4px 0 #8f6f2a;
-            border: 1px solid #ffdd77;
+            color: #f5e7b0;
+            text-shadow: 0 0 20px rgba(255, 180, 50, 0.2);
         }
-
-        .upload-area label i {
+        .header h1 i {
+            color: #f5c542;
             margin-right: 10px;
         }
-
-        .upload-area label:hover {
-            background: #f5c85a;
-            transform: scale(1.01);
-            box-shadow: 0 6px 0 #8f6f2a;
+        .header .badge {
+            background: #1a2535;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            border: 1px solid #2a3a50;
+            color: #9ab0cc;
         }
-
-        .upload-area input[type="file"] {
+        .upload-zone {
+            background: #101a26;
+            border: 2px dashed #2f4058;
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #f5c542;
+            background: #16202e;
+            box-shadow: inset 0 0 30px rgba(245, 197, 66, 0.05);
+        }
+        .upload-zone .icon {
+            font-size: 48px;
+            color: #f5c542;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .upload-zone p {
+            color: #8aa3c0;
+            font-size: 16px;
+        }
+        .upload-zone .file-input {
             display: none;
         }
-
-        .file-status {
-            margin-top: 1rem;
-            font-size: 0.95rem;
-            color: #b6c8db;
-            background: #1b2533;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
+        .upload-zone .btn-upload {
             display: inline-block;
+            background: #f5c542;
+            color: #0a0e17;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-size: 16px;
         }
-
+        .upload-zone .btn-upload:hover {
+            background: #ffd866;
+            transform: scale(1.02);
+        }
+        .status-bar {
+            background: #111d2b;
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid #1f2d3f;
+        }
+        .status-bar .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+        .status-bar .info i {
+            color: #f5c542;
+        }
+        .status-bar .count {
+            background: #1f2d40;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+        }
         .game-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.8rem;
-            margin-top: 0.5rem;
+            gap: 25px;
         }
-
-        @media (max-width: 700px) {
+        @media (max-width: 850px) {
             .game-grid {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            .retro-card {
-                padding: 1.5rem;
-            }
-            h1 {
-                font-size: 1.8rem;
             }
         }
-
         .emulator-box {
-            background: #0e151f;
-            border-radius: 1.8rem;
-            padding: 1.5rem 1.2rem 1.2rem;
-            box-shadow: inset 0 0 0 1px #2f3d4e, 0 10px 20px #00000055;
+            background: #0c1520;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #1d2a3a;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
         }
-
         .emulator-box h2 {
-            font-size: 1.2rem;
+            font-size: 18px;
             font-weight: 400;
+            color: #b8cee8;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: #c7d6e8;
-            border-bottom: 1px solid #293544;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 10px;
         }
-
         .emulator-box h2 i {
             color: #f5c542;
         }
-
         #gameCanvas {
-            background: #0c121c;
-            border-radius: 1.2rem;
             width: 100%;
             aspect-ratio: 4/3;
+            background: #080e18;
+            border-radius: 16px;
             display: block;
-            box-shadow: 0 0 0 1px #304050, 0 8px 16px #00000080;
-            image-rendering: crisp-edges; /* retro feel */
+            border: 1px solid #1f2f42;
+            image-rendering: pixelated;
         }
-
-        .controls-panel {
-            margin-top: 1rem;
+        .controls {
             display: flex;
+            gap: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem 1.2rem;
         }
-
-        .ctrl-btn {
-            background: #1f2b3a;
+        .controls button {
+            background: #1a2638;
             border: none;
+            color: #d0def0;
+            padding: 10px 20px;
             border-radius: 40px;
-            color: #d6e2f0;
-            padding: 0.5rem 1.2rem;
-            font-size: 0.9rem;
+            font-size: 14px;
             font-weight: 500;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 0 #0b1119, 0 2px 8px #00000066;
-            transition: 0.08s linear;
             cursor: pointer;
-            border: 1px solid #3f5167;
+            transition: 0.15s;
+            border: 1px solid #2d3e55;
+            box-shadow: 0 3px 0 #0b1119;
         }
-
-        .ctrl-btn:active {
+        .controls button:active {
             transform: translateY(3px);
-            box-shadow: 0 1px 0 #0b1119;
+            box-shadow: 0 0px 0 #0b1119;
         }
-
-        .ctrl-btn i {
+        .controls button i {
             color: #f5c542;
         }
-
-        .ctrl-btn.active-btn {
-            background: #2f4057;
-            border-color: #eab543;
+        .controls button:hover {
+            background: #23324a;
+            border-color: #f5c542;
         }
-
-        .info-side {
-            background: #0e151f;
-            border-radius: 1.8rem;
-            padding: 1.5rem 1.2rem;
-            box-shadow: inset 0 0 0 1px #2f3d4e, 0 10px 20px #00000055;
+        .rom-list-box {
+            background: #0c1520;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #1d2a3a;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 15px;
         }
-
-        .info-side h2 {
-            font-size: 1.2rem;
+        .rom-list-box h2 {
+            font-size: 18px;
             font-weight: 400;
+            color: #b8cee8;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: #c7d6e8;
-            border-bottom: 1px solid #293544;
-            padding-bottom: 0.5rem;
+            gap: 10px;
         }
-
+        .rom-list-box h2 i {
+            color: #f5c542;
+        }
         .rom-list {
-            background: #0b121d;
-            border-radius: 1.2rem;
-            padding: 0.8rem 1rem;
-            max-height: 200px;
+            background: #080f19;
+            border-radius: 16px;
+            padding: 8px;
+            max-height: 280px;
             overflow-y: auto;
-            font-size: 0.9rem;
-            border: 1px solid #273546;
+            border: 1px solid #1a2535;
         }
-
-        .rom-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        .rom-list::-webkit-scrollbar {
+            width: 5px;
         }
-
-        .rom-list li {
-            padding: 0.5rem 0.3rem;
-            border-bottom: 1px solid #1d2a39;
+        .rom-list::-webkit-scrollbar-track {
+            background: #0a111e;
+        }
+        .rom-list::-webkit-scrollbar-thumb {
+            background: #2f4058;
+            border-radius: 10px;
+        }
+        .rom-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid #141f2e;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #bacee2;
+            cursor: pointer;
+            transition: 0.1s;
+            border-radius: 8px;
         }
-
-        .rom-list li:last-child {
-            border-bottom: none;
+        .rom-item:hover {
+            background: #162230;
         }
-
-        .rom-list .rom-name {
-            font-weight: 400;
+        .rom-item.active {
+            background: #1f3150;
+            border-left: 3px solid #f5c542;
+        }
+        .rom-item .name {
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 150px;
+            max-width: 160px;
         }
-
-        .rom-list .rom-size {
+        .rom-item .size {
+            font-size: 12px;
             opacity: 0.6;
-            font-size: 0.75rem;
-            background: #192433;
-            padding: 0.2rem 0.6rem;
-            border-radius: 30px;
+            background: #141f2e;
+            padding: 2px 12px;
+            border-radius: 20px;
         }
-
-        .empty-roms {
-            opacity: 0.5;
+        .rom-item .load-badge {
+            font-size: 11px;
+            color: #f5c542;
+            margin-left: 8px;
+        }
+        .empty-msg {
             text-align: center;
-            padding: 1rem 0;
+            color: #556a82;
+            padding: 30px 0;
+            font-size: 14px;
         }
-
-        .footer-actions {
-            margin-top: 1.2rem;
+        .rom-actions {
             display: flex;
-            justify-content: flex-end;
-            gap: 0.8rem;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-
-        .clear-btn {
+        .rom-actions button {
             background: transparent;
-            border: 1px solid #5b6f89;
-            color: #b0c5dd;
-            padding: 0.35rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.8rem;
+            border: 1px solid #2d4058;
+            color: #b0c8e0;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 13px;
             cursor: pointer;
             transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        .clear-btn:hover {
-            background: #3c2a2a;
-            border-color: #c78a7a;
-            color: #f0d8d0;
+        .rom-actions button:hover {
+            background: #1a2538;
+            border-color: #f5c542;
+            color: #f5e7b0;
         }
-
-        .toast-msg {
-            margin-top: 1.2rem;
-            background: #1d2b38;
-            padding: 0.5rem 1.2rem;
-            border-radius: 60px;
-            color: #bfd3e8;
-            font-size: 0.9rem;
-            border-left: 4px solid #eab543;
+        .rom-actions button.danger:hover {
+            border-color: #e74c5e;
+            color: #e74c5e;
         }
-
-        /* scrollbar */
-        .rom-list::-webkit-scrollbar {
-            width: 6px;
+        .toast {
+            margin-top: 20px;
+            background: #111d2b;
+            padding: 12px 20px;
+            border-radius: 16px;
+            border-left: 4px solid #f5c542;
+            font-size: 14px;
+            color: #b8cee8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 50px;
         }
-        .rom-list::-webkit-scrollbar-track {
-            background: #0d1622;
+        .toast i {
+            color: #f5c542;
+            font-size: 18px;
         }
-        .rom-list::-webkit-scrollbar-thumb {
-            background: #3a4f68;
-            border-radius: 10px;
+        .key-hint {
+            font-size: 11px;
+            opacity: 0.4;
+            margin-top: 8px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-<div class="retro-card">
-    <h1><i class="fas fa-gamepad"></i> RetroStation · PS2</h1>
-    <div class="subhead">
-        <span><i class="fas fa-cloud-upload-alt"></i>  upload & play  </span>
-        <span><i class="fas fa-microchip"></i>  browser emulator  </span>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-gamepad"></i> RetroStation · PS2</h1>
+        <span class="badge"><i class="fas fa-microchip"></i> Local Emulator</span>
     </div>
 
-    <!-- upload area -->
-    <div class="upload-area" id="uploadArea">
-        <label for="romUpload"><i class="fas fa-folder-open"></i>  Choose PS2 ROM  (.bin/.iso)</label>
-        <input type="file" id="romUpload" accept=".bin,.iso,.img,.rom">
-        <div class="file-status" id="fileStatus"><i class="fas fa-info-circle"></i>  no ROM loaded</div>
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="uploadZone">
+        <i class="fas fa-cloud-upload-alt icon"></i>
+        <p>Drag & drop your PS2 ROM files here, or click to browse</p>
+        <p style="font-size:13px; color:#6a82a0; margin-top:6px;">Supports .bin, .iso, .img, .rom</p>
+        <input type="file" id="fileInput" class="file-input" accept=".bin,.iso,.img,.rom" multiple>
+        <button class="btn-upload" id="uploadBtn"><i class="fas fa-folder-open"></i> Choose Files</button>
     </div>
 
-    <!-- main grid: emulator + info -->
+    <!-- Status -->
+    <div class="status-bar">
+        <div class="info">
+            <i class="fas fa-circle" style="color:#7bed7b; font-size:12px;"></i>
+            <span id="statusText">Ready</span>
+        </div>
+        <div class="count" id="romCount">0 ROMs</div>
+    </div>
+
+    <!-- Main Grid -->
     <div class="game-grid">
-        <!-- left: emulator canvas + controls -->
+        <!-- Emulator -->
         <div class="emulator-box">
-            <h2><i class="fas fa-tv"></i>  PS2 emulator</h2>
+            <h2><i class="fas fa-tv"></i> PS2 Emulator</h2>
             <canvas id="gameCanvas" width="640" height="480"></canvas>
-            <div class="controls-panel">
-                <button class="ctrl-btn" id="playBtn"><i class="fas fa-play"></i> Play</button>
-                <button class="ctrl-btn" id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
-                <button class="ctrl-btn" id="resetBtn"><i class="fas fa-redo-alt"></i> Reset</button>
-                <button class="ctrl-btn" id="fullscreenBtn"><i class="fas fa-expand"></i> Full</button>
+            <div class="controls">
+                <button id="playBtn"><i class="fas fa-play"></i> Play</button>
+                <button id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                <button id="resetBtn"><i class="fas fa-redo-alt"></i> Reset</button>
+                <button id="fullscreenBtn"><i class="fas fa-expand"></i> Full</button>
             </div>
+            <div class="key-hint">Space: Play/Pause · R: Reset · F: Fullscreen</div>
         </div>
 
-        <!-- right: ROM list + info -->
-        <div class="info-side">
-            <h2><i class="fas fa-archive"></i>  uploaded ROMs</h2>
-            <div class="rom-list" id="romListContainer">
-                <ul id="romList">
-                    <li class="empty-roms"><span>📂 no ROMs uploaded yet</span></li>
-                </ul>
+        <!-- ROM List -->
+        <div class="rom-list-box">
+            <h2><i class="fas fa-archive"></i> Uploaded ROMs</h2>
+            <div class="rom-list" id="romList">
+                <div class="empty-msg">📂 No ROMs uploaded yet</div>
             </div>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="ctrl-btn" id="loadFirstRomBtn" style="flex:1;"><i class="fas fa-play-circle"></i> Load first</button>
-                <button class="clear-btn" id="clearRomsBtn"><i class="fas fa-trash-alt"></i> Clear all</button>
+            <div class="rom-actions">
+                <button id="loadFirstBtn"><i class="fas fa-play-circle"></i> Load First</button>
+                <button id="clearBtn" class="danger"><i class="fas fa-trash-alt"></i> Clear All</button>
             </div>
-            <div class="toast-msg" id="toastMessage"><i class="fas fa-lightbulb"></i>  upload a .bin/.iso to start</div>
+            <div class="toast" id="toastMessage">
+                <i class="fas fa-info-circle"></i>
+                <span>Upload a ROM to get started</span>
+            </div>
         </div>
-    </div>
-    <div style="margin-top: 1.5rem; text-align: center; opacity: 0.4; font-size: 0.8rem; letter-spacing: 0.3px;">
-        <i class="fas fa-shield-alt"></i>  all processing is local · ROMs stay in your browser
     </div>
 </div>
 
 <script>
-    (function(){
-        "use strict";
+    (function() {
+        'use strict';
 
-        // ----- DOM refs -----
+        // --- DOM refs ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const romUpload = document.getElementById('romUpload');
-        const fileStatus = document.getElementById('fileStatus');
-        const romListUl = document.getElementById('romList');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadZone = document.getElementById('uploadZone');
+        const statusText = document.getElementById('statusText');
+        const romCount = document.getElementById('romCount');
+        const romListEl = document.getElementById('romList');
         const toastMsg = document.getElementById('toastMessage');
         const playBtn = document.getElementById('playBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const resetBtn = document.getElementById('resetBtn');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const loadFirstBtn = document.getElementById('loadFirstRomBtn');
-        const clearRomsBtn = document.getElementById('clearRomsBtn');
+        const loadFirstBtn = document.getElementById('loadFirstBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
-        // ----- state -----
-        let roms = [];                // stored as { name, dataURL, size }
-        let currentRomIndex = -1;     // -1 = none loaded
-        let animationFrame = null;
+        // --- State ---
+        let roms = [];
+        let currentIndex = -1;
         let isPlaying = false;
+        let animFrame = null;
+        let frame = 0;
 
-        // ----- helper: toast -----
-        function showToast(msg, isGood = true) {
-            toastMsg.innerHTML = `<i class="fas ${isGood ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>  ${msg}`;
+        // --- Toast ---
+        function toast(msg, isGood = true) {
+            const icon = isGood ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            toastMsg.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
         }
 
-        // ----- render a demo / placeholder on canvas (PS2 style) -----
-        function drawPlaceholder(text = '🎮 PS2 ready') {
+        // --- Draw placeholder ---
+        function drawPlaceholder(text = '🎮 PS2 Ready') {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // dark gradient
-            const grd = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            grd.addColorStop(0, '#0a121c');
-            grd.addColorStop(1, '#182433');
-            ctx.fillStyle = grd;
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, '#0a121e');
+            grad.addColorStop(1, '#162230');
+            ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#b3cbdf';
-            ctx.font = 'bold 36px "Segoe UI", system-ui, sans-serif';
+            ctx.shadowColor = 'rgba(245,197,66,0.3)';
+            ctx.shadowBlur = 30;
+            ctx.fillStyle = '#f5e7b0';
+            ctx.font = 'bold 42px "Segoe UI", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.shadowColor = '#000000aa';
-            ctx.shadowBlur = 18;
             ctx.fillText(text, canvas.width/2, canvas.height/2 - 20);
-
-            ctx.font = '18px monospace';
-            ctx.fillStyle = '#7b93ad';
-            ctx.shadowBlur = 6;
-            ctx.fillText('⬆ upload a ROM', canvas.width/2, canvas.height/2 + 50);
             ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#6a82a0';
+            ctx.font = '18px monospace';
+            ctx.fillText('⬆ Upload a ROM', canvas.width/2, canvas.height/2 + 50);
         }
 
-        // ----- load ROM into canvas (simulate emulation) -----
-        function loadRomByIndex(index) {
+        // --- Draw game screen ---
+        function drawGameScreen(romName) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const grad = ctx.createRadialGradient(200, 200, 100, 400, 300, 500);
+            grad.addColorStop(0, '#1a2a40');
+            grad.addColorStop(1, '#080e18');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.shadowColor = 'rgba(245,197,66,0.2)';
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = '#f5e7b0';
+            ctx.font = 'bold 40px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('PS2 · EMULATION', canvas.width/2, 120);
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#b8cee8';
+            ctx.font = '22px monospace';
+            ctx.fillText(`🎮 ${romName}`, canvas.width/2, 230);
+
+            ctx.fillStyle = '#6a82a0';
+            ctx.font = '16px sans-serif';
+            ctx.fillText('⬆ Controls: Play / Pause / Reset', canvas.width/2, 340);
+
+            // Scanline overlay
+            ctx.fillStyle = 'rgba(255,255,255,0.02)';
+            for (let i = 0; i < 20; i++) {
+                const y = (frame * 2 + i * 26) % canvas.height;
+                ctx.fillRect(0, y, canvas.width, 2);
+            }
+        }
+
+        // --- Render ROM list ---
+        function renderRomList() {
+            if (roms.length === 0) {
+                romListEl.innerHTML = '<div class="empty-msg">📂 No ROMs uploaded yet</div>';
+                romCount.textContent = '0 ROMs';
+                return;
+            }
+            let html = '';
+            roms.forEach((rom, idx) => {
+                const active = idx === currentIndex ? 'active' : '';
+                const sizeKB = (rom.size / 1024).toFixed(1);
+                const loaded = idx === currentIndex ? '<span class="load-badge"><i class="fas fa-check-circle"></i></span>' : '';
+                html += `
+                    <div class="rom-item ${active}" data-index="${idx}">
+                        <span class="name">${rom.name} ${loaded}</span>
+                        <span class="size">${sizeKB} KB</span>
+                    </div>
+                `;
+            });
+            romListEl.innerHTML = html;
+            romCount.textContent = `${roms.length} ROMs`;
+
+            // Click handler for each item
+            document.querySelectorAll('.rom-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    loadRom(idx);
+                });
+            });
+        }
+
+        // --- Load ROM by index ---
+        function loadRom(index) {
             if (index < 0 || index >= roms.length) {
-                currentRomIndex = -1;
-                drawPlaceholder('📂 no ROM');
-                fileStatus.innerHTML = `<i class="fas fa-info-circle"></i>  no ROM loaded`;
-                showToast('No ROM selected', false);
+                toast('ROM not found', false);
                 return false;
             }
-
+            currentIndex = index;
             const rom = roms[index];
-            currentRomIndex = index;
-            fileStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#7bed7b;"></i>  loaded: ${rom.name}`;
+            drawGameScreen(rom.name);
+            statusText.textContent = `Loaded: ${rom.name}`;
+            toast(`✅ Loaded "${rom.name}"`);
+            renderRomList();
 
-            // draw a "game" screen (ps2 style) with the rom name
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const grd = ctx.createRadialGradient(200, 200, 50, 400, 300, 500);
-            grd.addColorStop(0, '#1f334a');
-            grd.addColorStop(1, '#0b111c');
-            ctx.fillStyle = grd;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#f5c54240';
-            ctx.fillStyle = '#f5e7c8';
-            ctx.font = 'bold 44px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('PS2 · emulation', canvas.width/2, 130);
-
-            ctx.font = '24px monospace';
-            ctx.fillStyle = '#bbd4ed';
-            ctx.fillText(`🎮 ${rom.name}`, canvas.width/2, 250);
-
-            ctx.font = '20px sans-serif';
-            ctx.fillStyle = '#95adc9';
-            ctx.fillText('⬆ controls: play / pause / reset', canvas.width/2, 360);
-            ctx.shadowBlur = 0;
-
-            showToast(`Loaded "${rom.name}"`, true);
+            // If playing, restart loop
             if (isPlaying) {
-                // if playing, we animate a subtle effect (just to show activity)
-                startEmulationLoop();
+                startLoop();
             }
             return true;
         }
 
-        // ----- emulation loop (just for demo / visual feedback) -----
-        function startEmulationLoop() {
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
+        // --- Emulation loop ---
+        function startLoop() {
+            if (animFrame) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
             }
             if (!isPlaying) return;
+            if (currentIndex === -1) {
+                drawPlaceholder('📂 No ROM');
+                animFrame = requestAnimationFrame(startLoop);
+                return;
+            }
 
-            let frame = 0;
-            function animate() {
+            function loop() {
                 if (!isPlaying) {
-                    animationFrame = null;
+                    animFrame = null;
                     return;
                 }
-                if (currentRomIndex === -1) {
-                    // if no ROM, draw placeholder but keep loop
-                    drawPlaceholder('📂 no ROM');
-                    animationFrame = requestAnimationFrame(animate);
+                if (currentIndex === -1) {
+                    drawPlaceholder('📂 No ROM');
+                    animFrame = requestAnimationFrame(loop);
                     return;
                 }
-                // subtle "scanline" effect to simulate emulation
-                const rom = roms[currentRomIndex];
-                ctx.drawImage(canvas, 0, 0); // keep previous
-                ctx.fillStyle = '#ffffff08';
-                for (let i = 0; i < 20; i++) {
-                    const y = (frame * 3 + i * 28) % canvas.height;
-                    ctx.fillRect(0, y, canvas.width, 2);
-                }
-                // overlay small text
-                ctx.fillStyle = '#b3d0f0';
-                ctx.font = '14px monospace';
-                ctx.fillText(`▶ ${rom.name}  ·  frame ${frame++}`, 20, 40);
-                ctx.fillStyle = '#f5c54230';
+                const rom = roms[currentIndex];
+                drawGameScreen(rom.name);
+                // Extra glitch effect
+                ctx.fillStyle = `rgba(100,200,255,${0.015 + Math.sin(frame * 0.05) * 0.01})`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                animationFrame = requestAnimationFrame(animate);
+                ctx.fillStyle = '#b8cee8';
+                ctx.font = '12px monospace';
+                ctx.fillText(`▶ ${rom.name}  ·  frame ${frame++}`, 16, 30);
+                animFrame = requestAnimationFrame(loop);
             }
-            animate();
+            loop();
         }
 
-        // ----- stop emulation loop -----
-        function stopEmulationLoop() {
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
+        function stopLoop() {
+            if (animFrame) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
             }
         }
 
-        // ----- render ROM list -----
-        function renderRomList() {
-            romListUl.innerHTML = '';
-            if (roms.length === 0) {
-                romListUl.innerHTML = '<li class="empty-roms"><span>📂 no ROMs uploaded</span></li>';
-                return;
-            }
-            roms.forEach((rom, idx) => {
-                const li = document.createElement('li');
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'rom-name';
-                nameSpan.textContent = rom.name;
-                const sizeSpan = document.createElement('span');
-                sizeSpan.className = 'rom-size';
-                sizeSpan.textContent = (rom.size / 1024).toFixed(1) + ' KB';
-                li.appendChild(nameSpan);
-                li.appendChild(sizeSpan);
-                li.style.cursor = 'pointer';
-                li.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    loadRomByIndex(idx);
-                });
-                romListUl.appendChild(li);
-            });
-        }
-
-        // ----- add ROM from file -----
-        function handleRomFile(file) {
-            const validTypes = ['application/octet-stream', 'application/x-iso9660-image', 'application/x-cd-image'];
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (!['bin', 'iso', 'img', 'rom'].includes(ext)) {
-                showToast('⚠️  Please upload .bin / .iso / .img', false);
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataURL = e.target.result;
-                const rom = {
-                    name: file.name,
-                    dataURL: dataURL,
-                    size: file.size,
-                };
-                roms.push(rom);
-                renderRomList();
-                // auto-load if it's the first one
-                if (roms.length === 1) {
-                    loadRomByIndex(0);
-                } else {
-                    showToast(`✅ ${file.name} added`, true);
+        // --- Handle file upload (FIXED) ---
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            
+            let loaded = 0;
+            for (let f of files) {
+                // Validate extension
+                const ext = f.name.split('.').pop().toLowerCase();
+                if (!['bin', 'iso', 'img', 'rom'].includes(ext)) {
+                    toast(`⚠️ Skipped "${f.name}" (unsupported format)`, false);
+                    continue;
                 }
-                fileStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#7bed7b;"></i>  ${roms.length} ROM(s) ready`;
-            };
-            reader.onerror = () => {
-                showToast('❌ Error reading file', false);
-            };
-            reader.readAsDataURL(file);
+                if (f.size === 0) {
+                    toast(`⚠️ "${f.name}" is empty`, false);
+                    continue;
+                }
+                if (f.size > 4 * 1024 * 1024 * 1024) {
+                    toast(`⚠️ "${f.name}" is too large (max 4GB)`, false);
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const dataURL = e.target.result;
+                        roms.push({
+                            name: f.name,
+                            dataURL: dataURL,
+                            size: f.size
+                        });
+                        loaded++;
+                        renderRomList();
+                        statusText.textContent = `Ready · ${roms.length} ROMs`;
+                        toast(`✅ "${f.name}" added`);
+                        // Auto-load first ROM
+                        if (roms.length === 1 && currentIndex === -1) {
+                            loadRom(0);
+                        }
+                    } catch(err) {
+                        toast(`❌ Error processing "${f.name}"`, false);
+                    }
+                };
+                reader.onerror = function() {
+                    toast(`❌ Failed to read "${f.name}"`, false);
+                };
+                reader.readAsDataURL(f);
+            }
         }
 
-        // ----- clear all roms -----
-        function clearAllRoms() {
+        // --- Clear all ---
+        function clearAll() {
             if (roms.length === 0) {
-                showToast('No ROMs to clear', false);
+                toast('No ROMs to clear', false);
                 return;
             }
             roms = [];
-            currentRomIndex = -1;
-            stopEmulationLoop();
+            currentIndex = -1;
             isPlaying = false;
+            stopLoop();
             renderRomList();
-            drawPlaceholder('📂 no ROM');
-            fileStatus.innerHTML = `<i class="fas fa-info-circle"></i>  no ROM loaded`;
-            showToast('🗑️  All ROMs cleared', true);
+            drawPlaceholder('🎮 PS2 Ready');
+            statusText.textContent = 'Ready';
+            toast('🗑️ All ROMs cleared');
         }
 
-        // ----- load first rom (useful) -----
-        function loadFirstRom() {
-            if (roms.length === 0) {
-                showToast('No ROMs uploaded yet', false);
+        // --- Reset current ---
+        function resetCurrent() {
+            if (currentIndex === -1 || roms.length === 0) {
+                toast('No ROM loaded', false);
                 return;
             }
-            loadRomByIndex(0);
+            loadRom(currentIndex);
+            toast('🔄 Reset');
         }
 
-        // ----- reset current rom -----
-        function resetCurrentRom() {
-            if (currentRomIndex === -1 || roms.length === 0) {
-                showToast('No ROM loaded to reset', false);
-                return;
-            }
-            loadRomByIndex(currentRomIndex);
-            showToast('🔄 Reset', true);
-        }
-
-        // ----- fullscreen canvas -----
+        // --- Fullscreen ---
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 canvas.requestFullscreen?.() || canvas.webkitRequestFullscreen?.();
@@ -641,81 +662,88 @@
             }
         }
 
-        // ----- init -----
+        // --- Init ---
         function init() {
-            drawPlaceholder('🎮 PS2 ready');
+            drawPlaceholder('🎮 PS2 Ready');
             renderRomList();
 
-            // upload
-            romUpload.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleRomFile(e.target.files[0]);
+            // Upload button triggers file input
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            uploadZone.addEventListener('click', () => fileInput.click());
+
+            // File input change
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files.length > 0) {
+                    handleFiles(this.files);
                 }
-                romUpload.value = ''; // allow re-upload same file
+                this.value = ''; // Reset
             });
 
-            // drag & drop on upload area
-            const uploadArea = document.getElementById('uploadArea');
-            uploadArea.addEventListener('dragover', (e) => {
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                uploadArea.style.borderColor = '#f5c542';
+                uploadZone.classList.add('dragover');
             });
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.style.borderColor = '#4d5e74';
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
             });
-            uploadArea.addEventListener('drop', (e) => {
+            uploadZone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                uploadArea.style.borderColor = '#4d5e74';
-                if (e.dataTransfer.files.length > 0) {
-                    handleRomFile(e.dataTransfer.files[0]);
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
                 }
             });
 
-            // controls
+            // Controls
             playBtn.addEventListener('click', () => {
-                if (currentRomIndex === -1) {
-                    showToast('Load a ROM first', false);
+                if (currentIndex === -1) {
+                    toast('Load a ROM first', false);
                     return;
                 }
                 isPlaying = true;
-                startEmulationLoop();
-                showToast('▶️ Playing', true);
+                startLoop();
+                toast('▶️ Playing');
             });
 
             pauseBtn.addEventListener('click', () => {
                 isPlaying = false;
-                stopEmulationLoop();
-                if (currentRomIndex !== -1) {
-                    // keep the static image
-                    showToast('⏸️ Paused', true);
-                } else {
-                    drawPlaceholder('⏸️ paused');
+                stopLoop();
+                toast('⏸️ Paused');
+                if (currentIndex !== -1) {
+                    drawGameScreen(roms[currentIndex].name);
                 }
             });
 
-            resetBtn.addEventListener('click', resetCurrentRom);
-
+            resetBtn.addEventListener('click', resetCurrent);
             fullscreenBtn.addEventListener('click', toggleFullscreen);
+            loadFirstBtn.addEventListener('click', () => {
+                if (roms.length === 0) {
+                    toast('No ROMs uploaded', false);
+                    return;
+                }
+                loadRom(0);
+            });
+            clearBtn.addEventListener('click', clearAll);
 
-            loadFirstBtn.addEventListener('click', loadFirstRom);
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Space') {
+                    e.preventDefault();
+                    if (isPlaying) pauseBtn.click();
+                    else playBtn.click();
+                }
+                if (e.key === 'r' || e.key === 'R') resetBtn.click();
+                if (e.key === 'f' || e.key === 'F') fullscreenBtn.click();
+            });
 
-            clearRomsBtn.addEventListener('click', clearAllRoms);
-
-            // extra: click on canvas to toggle play/pause?
+            // Double-click canvas to toggle
             canvas.addEventListener('dblclick', () => {
-                if (isPlaying) {
-                    pauseBtn.click();
-                } else {
-                    playBtn.click();
-                }
+                if (isPlaying) pauseBtn.click();
+                else playBtn.click();
             });
 
-            // if user leaves fullscreen
-            document.addEventListener('fullscreenchange', () => {
-                if (!document.fullscreenElement) {
-                    // nothing
-                }
-            });
+            toast('🎮 Ready! Upload a ROM to start');
         }
 
         init();
