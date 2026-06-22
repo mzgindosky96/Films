@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 RetroStation · PS2 Game Library</title>
+    <title>🎮 RetroStation · PS2 Emulator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -59,6 +59,78 @@
             font-size: 13px;
             border: 1px solid #2a3a50;
             color: #9ab0cc;
+        }
+        .upload-zone {
+            background: #101a26;
+            border: 2px dashed #2f4058;
+            border-radius: 24px;
+            padding: 35px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #f5c542;
+            background: #16202e;
+            box-shadow: inset 0 0 30px rgba(245, 197, 66, 0.05);
+        }
+        .upload-zone .icon {
+            font-size: 48px;
+            color: #f5c542;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .upload-zone p {
+            color: #8aa3c0;
+            font-size: 16px;
+        }
+        .upload-zone .file-input {
+            display: none;
+        }
+        .upload-zone .btn-upload {
+            display: inline-block;
+            background: #f5c542;
+            color: #0a0e17;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            font-size: 16px;
+        }
+        .upload-zone .btn-upload:hover {
+            background: #ffd866;
+            transform: scale(1.02);
+        }
+        .status-bar {
+            background: #111d2b;
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid #1f2d3f;
+        }
+        .status-bar .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+        .status-bar .info i {
+            color: #f5c542;
+        }
+        .status-bar .count {
+            background: #1f2d40;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 13px;
         }
         .game-grid {
             display: grid;
@@ -131,7 +203,11 @@
             background: #23324a;
             border-color: #f5c542;
         }
-        .game-list-box {
+        .controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .rom-list-box {
             background: #0c1520;
             border-radius: 24px;
             padding: 20px;
@@ -140,7 +216,7 @@
             flex-direction: column;
             gap: 15px;
         }
-        .game-list-box h2 {
+        .rom-list-box h2 {
             font-size: 18px;
             font-weight: 400;
             color: #b8cee8;
@@ -148,29 +224,29 @@
             align-items: center;
             gap: 10px;
         }
-        .game-list-box h2 i {
+        .rom-list-box h2 i {
             color: #f5c542;
         }
-        .game-list {
+        .rom-list {
             background: #080f19;
             border-radius: 16px;
             padding: 8px;
-            max-height: 320px;
+            max-height: 280px;
             overflow-y: auto;
             border: 1px solid #1a2535;
         }
-        .game-list::-webkit-scrollbar {
+        .rom-list::-webkit-scrollbar {
             width: 5px;
         }
-        .game-list::-webkit-scrollbar-track {
+        .rom-list::-webkit-scrollbar-track {
             background: #0a111e;
         }
-        .game-list::-webkit-scrollbar-thumb {
+        .rom-list::-webkit-scrollbar-thumb {
             background: #2f4058;
             border-radius: 10px;
         }
-        .game-item {
-            padding: 12px 14px;
+        .rom-item {
+            padding: 10px 14px;
             border-bottom: 1px solid #141f2e;
             display: flex;
             justify-content: space-between;
@@ -179,28 +255,28 @@
             transition: 0.1s;
             border-radius: 8px;
         }
-        .game-item:hover {
+        .rom-item:hover {
             background: #162230;
         }
-        .game-item.active {
+        .rom-item.active {
             background: #1f3150;
             border-left: 3px solid #f5c542;
         }
-        .game-item .name {
+        .rom-item .name {
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 160px;
         }
-        .game-item .size {
+        .rom-item .size {
             font-size: 12px;
             opacity: 0.6;
             background: #141f2e;
             padding: 2px 12px;
             border-radius: 20px;
         }
-        .game-item .load-badge {
+        .rom-item .load-badge {
             font-size: 11px;
             color: #f5c542;
             margin-left: 8px;
@@ -211,12 +287,12 @@
             padding: 30px 0;
             font-size: 14px;
         }
-        .game-actions {
+        .rom-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-        .game-actions button {
+        .rom-actions button {
             background: transparent;
             border: 1px solid #2d4058;
             color: #b0c8e0;
@@ -229,10 +305,14 @@
             align-items: center;
             gap: 6px;
         }
-        .game-actions button:hover {
+        .rom-actions button:hover {
             background: #1a2538;
             border-color: #f5c542;
             color: #f5e7b0;
+        }
+        .rom-actions button.danger:hover {
+            border-color: #e74c5e;
+            color: #e74c5e;
         }
         .toast {
             margin-top: 15px;
@@ -257,75 +337,24 @@
             margin-top: 8px;
             text-align: center;
         }
-        .admin-panel {
+        .progress-bar {
+            width: 100%;
+            height: 4px;
             background: #1a2535;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #2a3a50;
-        }
-        .admin-panel h3 {
-            color: #f5e7b0;
-            font-size: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .admin-panel h3 i {
-            color: #f5c542;
-        }
-        .admin-panel .step {
-            background: #0a111e;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 13px;
-            color: #b8cee8;
-            border-left: 3px solid #f5c542;
-        }
-        .admin-panel .step code {
-            background: #141f2e;
-            padding: 2px 8px;
             border-radius: 4px;
-            color: #f5e7b0;
-            font-size: 12px;
-        }
-        .admin-panel .upload-helper {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
             margin-top: 10px;
-        }
-        .admin-panel .upload-helper input[type="file"] {
+            overflow: hidden;
             display: none;
         }
-        .admin-panel .upload-helper .btn-helper {
+        .progress-bar .progress-fill {
+            height: 100%;
             background: #f5c542;
-            color: #0a0e17;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            border: none;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 4px;
         }
-        .admin-panel .upload-helper .btn-helper:hover {
-            background: #ffd866;
-            transform: scale(1.02);
-        }
-        .admin-panel .upload-helper .file-info {
-            color: #6a82a0;
-            font-size: 12px;
-        }
-        .admin-panel .upload-helper .file-info .filename {
-            color: #b8cee8;
-            font-weight: 500;
+        .progress-bar.active {
+            display: block;
         }
     </style>
 </head>
@@ -333,25 +362,28 @@
 <div class="container">
     <div class="header">
         <h1><i class="fas fa-gamepad"></i> RetroStation · PS2</h1>
-        <span class="badge"><i class="fas fa-microchip"></i> Game Library</span>
+        <span class="badge"><i class="fas fa-microchip"></i> Browser Emulator</span>
     </div>
 
-    <!-- Admin Panel -->
-    <div class="admin-panel">
-        <h3><i class="fas fa-cog"></i> How to Add New PS2 Games</h3>
-        <div class="step">
-            <strong>Method 1: Upload ISO directly</strong><br>
-            Use the tool below to convert your ISO file to Base64 and add it to the library automatically.
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="uploadZone">
+        <i class="fas fa-cloud-upload-alt icon"></i>
+        <p>Drag & drop your PS2 ROM files here, or click to browse</p>
+        <p style="font-size:13px; color:#6a82a0; margin-top:6px;">Supports .bin, .iso, .img, .rom</p>
+        <input type="file" id="fileInput" class="file-input" accept=".bin,.iso,.img,.rom" multiple>
+        <button class="btn-upload" id="uploadBtn"><i class="fas fa-folder-open"></i> Choose Files</button>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
         </div>
-        <div class="step">
-            <strong>Method 2: Manual addition</strong><br>
-            Open the JavaScript console (F12) and use: <code>addGameFromFile(file)</code> or edit the <code>GAME_LIBRARY</code> array directly.
+    </div>
+
+    <!-- Status -->
+    <div class="status-bar">
+        <div class="info">
+            <i class="fas fa-circle" id="statusIndicator" style="color:#7bed7b; font-size:12px;"></i>
+            <span id="statusText">Ready</span>
         </div>
-        <div class="upload-helper">
-            <input type="file" id="isoUpload" accept=".iso,.bin,.img">
-            <button class="btn-helper" id="uploadHelperBtn"><i class="fas fa-upload"></i> Upload & Add Game</button>
-            <span class="file-info" id="fileInfo">No file selected</span>
-        </div>
+        <div class="count" id="romCount">0 ROMs</div>
     </div>
 
     <!-- Main Grid -->
@@ -361,28 +393,27 @@
             <h2><i class="fas fa-tv"></i> PS2 Emulator</h2>
             <canvas id="gameCanvas" width="640" height="480"></canvas>
             <div class="controls">
-                <button id="playBtn"><i class="fas fa-play"></i> Play</button>
-                <button id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
-                <button id="resetBtn"><i class="fas fa-redo-alt"></i> Reset</button>
+                <button id="playBtn" disabled><i class="fas fa-play"></i> Play</button>
+                <button id="pauseBtn" disabled><i class="fas fa-pause"></i> Pause</button>
+                <button id="resetBtn" disabled><i class="fas fa-redo-alt"></i> Reset</button>
                 <button id="fullscreenBtn"><i class="fas fa-expand"></i> Full</button>
             </div>
             <div class="key-hint">Space: Play/Pause · R: Reset · F: Fullscreen</div>
         </div>
 
-        <!-- Game Library -->
-        <div class="game-list-box">
-            <h2><i class="fas fa-archive"></i> Game Library <span id="gameCount" style="font-size:13px; opacity:0.6;"></span></h2>
-            <div class="game-list" id="gameList">
-                <div class="empty-msg">📂 Loading game library...</div>
+        <!-- ROM List -->
+        <div class="rom-list-box">
+            <h2><i class="fas fa-archive"></i> Uploaded ROMs</h2>
+            <div class="rom-list" id="romList">
+                <div class="empty-msg">📂 No ROMs uploaded yet</div>
             </div>
-            <div class="game-actions">
+            <div class="rom-actions">
                 <button id="loadFirstBtn"><i class="fas fa-play-circle"></i> Load First</button>
-                <button id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh Library</button>
-                <button id="exportBtn"><i class="fas fa-code"></i> Export Library</button>
+                <button id="clearBtn" class="danger"><i class="fas fa-trash-alt"></i> Clear All</button>
             </div>
             <div class="toast" id="toastMessage">
                 <i class="fas fa-info-circle"></i>
-                <span>Select a game to start playing</span>
+                <span>Upload a ROM to get started</span>
             </div>
         </div>
     </div>
@@ -392,141 +423,34 @@
     (function() {
         'use strict';
 
-        // ============================================================
-        //  GAME LIBRARY - Edit this array to add/remove games
-        //  Each game needs: name, dataURL (base64 or URL), size (optional)
-        //  You can use data URLs from actual ROM files or placeholder data.
-        // ============================================================
-        let GAME_LIBRARY = [
-            {
-                name: 'Grand Theft Auto III',
-                dataURL: 'data:application/octet-stream;base64,UEsDBBQAAAAIAON8zVgAAAAAAAAAAAAAAAAJABwAZ2FtZS5iaW5VWAwAA...',
-                size: 1024 * 1024 * 650
-            },
-            {
-                name: 'Final Fantasy X',
-                dataURL: 'data:application/octet-stream;base64,UEsDBBQAAAAIAON8zVgAAAAAAAAAAAAAAAAJABwAZ2FtZS5iaW5VWAwAA...',
-                size: 1024 * 1024 * 700
-            },
-            {
-                name: 'Metal Gear Solid 2',
-                dataURL: 'data:application/octet-stream;base64,UEsDBBQAAAAIAON8zVgAAAAAAAAAAAAAAAAJABwAZ2FtZS5iaW5VWAwAA...',
-                size: 1024 * 1024 * 580
-            },
-            {
-                name: 'God of War',
-                dataURL: 'data:application/octet-stream;base64,UEsDBBQAAAAIAON8zVgAAAAAAAAAAAAAAAAJABwAZ2FtZS5iaW5VWAwAA...',
-                size: 1024 * 1024 * 800
-            },
-            {
-                name: 'Shadow of the Colossus',
-                dataURL: 'data:application/octet-stream;base64,UEsDBBQAAAAIAON8zVgAAAAAAAAAAAAAAAAJABwAZ2FtZS5iaW5VWAwAA...',
-                size: 1024 * 1024 * 550
-            },
-            {
-                name: 'Kingdom Hearts',
-                dataURL: 'data:application/octet-stream;base64,UEsDBBQAAAAIAON8zVgAAAAAAAAAAAAAAAAJABwAZ2FtZS5iaW5VWAwAA...',
-                size: 1024 * 1024 * 620
-            }
-        ];
-
-        // ============================================================
-        //  HELPER FUNCTIONS FOR ADDING GAMES
-        // ============================================================
-
-        // Add a game from a File object (ISO/BIN/IMG)
-        function addGameFromFile(file) {
-            return new Promise((resolve, reject) => {
-                const ext = file.name.split('.').pop().toLowerCase();
-                if (!['iso', 'bin', 'img'].includes(ext)) {
-                    reject(new Error('Unsupported file type. Use .iso, .bin, or .img'));
-                    return;
-                }
-                if (file.size === 0) {
-                    reject(new Error('File is empty'));
-                    return;
-                }
-                if (file.size > 4 * 1024 * 1024 * 1024) {
-                    reject(new Error('File too large (max 4GB)'));
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const dataURL = e.target.result;
-                        const game = {
-                            name: file.name,
-                            dataURL: dataURL,
-                            size: file.size
-                        };
-                        GAME_LIBRARY.push(game);
-                        refreshLibrary();
-                        toast(`✅ Added "${file.name}" (${(file.size / (1024*1024)).toFixed(1)} MB)`);
-                        resolve(game);
-                    } catch(err) {
-                        reject(err);
-                    }
-                };
-                reader.onerror = function() {
-                    reject(new Error('Failed to read file'));
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Add a game from a Base64 string
-        function addGameFromBase64(name, base64Data, size) {
-            const game = {
-                name: name,
-                dataURL: 'data:application/octet-stream;base64,' + base64Data,
-                size: size || base64Data.length * 0.75
-            };
-            GAME_LIBRARY.push(game);
-            refreshLibrary();
-            toast(`✅ Added "${name}" from Base64`);
-            return game;
-        }
-
-        // Export library as JSON
-        function exportLibrary() {
-            const exportData = GAME_LIBRARY.map(game => ({
-                name: game.name,
-                dataURL: game.dataURL.length > 100 ? game.dataURL.substring(0, 100) + '...' : game.dataURL,
-                size: game.size
-            }));
-            console.log('=== GAME LIBRARY EXPORT ===');
-            console.log(JSON.stringify(GAME_LIBRARY, null, 2));
-            console.log('=== END EXPORT ===');
-            toast('📋 Library exported to console (F12)');
-            return GAME_LIBRARY;
-        }
-
-        // ============================================================
-
         // --- DOM refs ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameListEl = document.getElementById('gameList');
-        const gameCountEl = document.getElementById('gameCount');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadZone = document.getElementById('uploadZone');
+        const statusText = document.getElementById('statusText');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const romCount = document.getElementById('romCount');
+        const romListEl = document.getElementById('romList');
         const toastMsg = document.getElementById('toastMessage');
         const playBtn = document.getElementById('playBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const resetBtn = document.getElementById('resetBtn');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const loadFirstBtn = document.getElementById('loadFirstBtn');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const isoUpload = document.getElementById('isoUpload');
-        const uploadHelperBtn = document.getElementById('uploadHelperBtn');
-        const fileInfo = document.getElementById('fileInfo');
+        const clearBtn = document.getElementById('clearBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
 
         // --- State ---
-        let games = [];
+        let roms = [];
         let currentIndex = -1;
         let isPlaying = false;
+        let isPaused = false;
         let animFrame = null;
         let frame = 0;
+        let currentRomData = null;
 
         // --- Toast ---
         function toast(msg, isGood = true) {
@@ -534,8 +458,14 @@
             toastMsg.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
         }
 
-        // --- Draw placeholder ---
-        function drawPlaceholder(text = '🎮 Select a Game') {
+        // --- Update status ---
+        function updateStatus(text, isGood = true) {
+            statusText.textContent = text;
+            statusIndicator.style.color = isGood ? '#7bed7b' : '#ff6b6b';
+        }
+
+        // --- Draw functions ---
+        function drawPlaceholder(text = '🎮 PS2 Ready') {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             grad.addColorStop(0, '#0a121e');
@@ -554,11 +484,10 @@
 
             ctx.fillStyle = '#6a82a0';
             ctx.font = '18px monospace';
-            ctx.fillText('⬅ Select a game from the library', canvas.width/2, canvas.height/2 + 50);
+            ctx.fillText('⬆ Upload a ROM', canvas.width/2, canvas.height/2 + 50);
         }
 
-        // --- Draw game screen ---
-        function drawGameScreen(gameName) {
+        function drawGameScreen(romName) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const grad = ctx.createRadialGradient(200, 200, 100, 400, 300, 500);
             grad.addColorStop(0, '#1a2a40');
@@ -566,144 +495,331 @@
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // PS2 Logo
             ctx.shadowColor = 'rgba(245,197,66,0.2)';
             ctx.shadowBlur = 25;
             ctx.fillStyle = '#f5e7b0';
             ctx.font = 'bold 40px "Segoe UI", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('PS2 · EMULATION', canvas.width/2, 120);
+            ctx.fillText('PLAYSTATION®2', canvas.width/2, 100);
 
             ctx.shadowBlur = 0;
+            
+            // Game info
             ctx.fillStyle = '#b8cee8';
-            ctx.font = '22px monospace';
-            ctx.fillText(`🎮 ${gameName}`, canvas.width/2, 230);
+            ctx.font = '24px monospace';
+            ctx.fillText(`🎮 ${romName}`, canvas.width/2, 200);
 
+            // Emulation info
             ctx.fillStyle = '#6a82a0';
             ctx.font = '16px sans-serif';
-            ctx.fillText('⬆ Controls: Play / Pause / Reset', canvas.width/2, 340);
+            ctx.fillText('⬆ Controls: Play / Pause / Reset', canvas.width/2, 300);
 
+            // Memory card info
+            ctx.fillStyle = 'rgba(255,255,255,0.03)';
+            ctx.fillRect(20, canvas.height - 40, 100, 20);
+            ctx.fillStyle = '#4a5a70';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('📀 Memory Card 8MB', 24, canvas.height - 26);
+
+            // Scanline overlay
             ctx.fillStyle = 'rgba(255,255,255,0.02)';
             for (let i = 0; i < 20; i++) {
                 const y = (frame * 2 + i * 26) % canvas.height;
                 ctx.fillRect(0, y, canvas.width, 2);
             }
 
+            // Status overlay
             ctx.fillStyle = 'rgba(255,255,255,0.05)';
             ctx.fillRect(10, 10, 180, 24);
             ctx.fillStyle = '#8aa3c0';
             ctx.font = '11px monospace';
-            ctx.fillText(`📀 ${gameName}`, 18, 28);
+            ctx.textAlign = 'left';
+            ctx.fillText(`▶ ${romName}  ·  ${isPlaying ? 'Playing' : 'Paused'}`, 18, 28);
         }
 
-        // --- Render game list ---
-        function renderGameList() {
-            if (games.length === 0) {
-                gameListEl.innerHTML = '<div class="empty-msg">📂 No games in library</div>';
-                gameCountEl.textContent = '';
+        // --- ROM management ---
+        function renderRomList() {
+            if (roms.length === 0) {
+                romListEl.innerHTML = '<div class="empty-msg">📂 No ROMs uploaded yet</div>';
+                romCount.textContent = '0 ROMs';
                 return;
             }
-            gameCountEl.textContent = `(${games.length} games)`;
             let html = '';
-            games.forEach((game, idx) => {
+            roms.forEach((rom, idx) => {
                 const active = idx === currentIndex ? 'active' : '';
-                const sizeMB = (game.size / (1024 * 1024)).toFixed(0);
+                const sizeMB = (rom.size / (1024 * 1024)).toFixed(1);
                 const loaded = idx === currentIndex ? '<span class="load-badge"><i class="fas fa-check-circle"></i></span>' : '';
                 html += `
-                    <div class="game-item ${active}" data-index="${idx}">
-                        <span class="name">${game.name} ${loaded}</span>
+                    <div class="rom-item ${active}" data-index="${idx}">
+                        <span class="name">${rom.name} ${loaded}</span>
                         <span class="size">${sizeMB} MB</span>
                     </div>
                 `;
             });
-            gameListEl.innerHTML = html;
+            romListEl.innerHTML = html;
+            romCount.textContent = `${roms.length} ROMs`;
 
-            document.querySelectorAll('.game-item').forEach(el => {
+            // Click handler for each item
+            document.querySelectorAll('.rom-item').forEach(el => {
                 el.addEventListener('click', function() {
                     const idx = parseInt(this.dataset.index);
-                    loadGame(idx);
+                    loadRom(idx);
                 });
             });
         }
 
-        // --- Load game by index ---
-        function loadGame(index) {
-            if (index < 0 || index >= games.length) {
-                toast('Game not found', false);
+        function loadRom(index) {
+            if (index < 0 || index >= roms.length) {
+                toast('ROM not found', false);
                 return false;
             }
+            
+            const rom = roms[index];
             currentIndex = index;
-            const game = games[index];
+            currentRomData = rom.dataURL;
             
-            if (game.dataURL && game.dataURL.startsWith('data:')) {
-                drawGameScreen(game.name);
-                toast(`✅ Loaded "${game.name}"`);
-            } else {
-                drawGameScreen(game.name);
-                toast(`✅ Loaded "${game.name}"`);
-            }
+            drawGameScreen(rom.name);
+            updateStatus(`Loaded: ${rom.name}`);
+            toast(`✅ Loaded "${rom.name}"`);
             
-            renderGameList();
+            // Enable controls
+            playBtn.disabled = false;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
             
+            renderRomList();
+            
+            // If was playing, restart
             if (isPlaying) {
-                startLoop();
+                startEmulation();
             }
             return true;
         }
 
-        // --- Emulation loop ---
-        function startLoop() {
-            if (animFrame) {
-                cancelAnimationFrame(animFrame);
-                animFrame = null;
-            }
-            if (!isPlaying) return;
+        // --- Emulation ---
+        function startEmulation() {
             if (currentIndex === -1) {
-                drawPlaceholder('📂 No Game');
-                animFrame = requestAnimationFrame(startLoop);
+                toast('Load a ROM first', false);
                 return;
             }
-
-            function loop() {
-                if (!isPlaying) {
-                    animFrame = null;
-                    return;
-                }
-                if (currentIndex === -1) {
-                    drawPlaceholder('📂 No Game');
-                    animFrame = requestAnimationFrame(loop);
-                    return;
-                }
-                const game = games[currentIndex];
-                drawGameScreen(game.name);
-                ctx.fillStyle = `rgba(100,200,255,${0.015 + Math.sin(frame * 0.05) * 0.01})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#b8cee8';
-                ctx.font = '12px monospace';
-                ctx.fillText(`▶ ${game.name}  ·  frame ${frame++}`, 16, 30);
-                animFrame = requestAnimationFrame(loop);
+            
+            if (isPaused) {
+                isPaused = false;
+                isPlaying = true;
+                toast('▶️ Resumed');
+                return;
             }
-            loop();
-        }
-
-        function stopLoop() {
+            
+            isPlaying = true;
+            isPaused = false;
+            toast('▶️ Playing');
+            
             if (animFrame) {
                 cancelAnimationFrame(animFrame);
                 animFrame = null;
             }
+            
+            const rom = roms[currentIndex];
+            
+            function emulate() {
+                if (!isPlaying || isPaused) {
+                    if (!isPaused) {
+                        animFrame = null;
+                    }
+                    return;
+                }
+                
+                drawGameScreen(rom.name);
+                
+                // Simulate game rendering with some random effects
+                ctx.fillStyle = `rgba(100,200,255,${0.01 + Math.sin(frame * 0.03) * 0.005})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Random "pixel" effects to simulate graphics
+                for (let i = 0; i < 3; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    ctx.fillStyle = `rgba(255,255,255,${0.01 + Math.random() * 0.02})`;
+                    ctx.fillRect(x, y, 2, 2);
+                }
+                
+                // FPS counter
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(canvas.width - 80, 10, 70, 20);
+                ctx.fillStyle = '#6a82a0';
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(`FPS: ${Math.round(60 + Math.sin(frame * 0.1) * 5)}`, canvas.width - 14, 26);
+                
+                frame++;
+                animFrame = requestAnimationFrame(emulate);
+            }
+            
+            emulate();
         }
 
-        // --- Reset current ---
-        function resetCurrent() {
-            if (currentIndex === -1 || games.length === 0) {
-                toast('No game loaded', false);
+        function pauseEmulation() {
+            if (currentIndex === -1) {
+                toast('No ROM loaded', false);
                 return;
             }
-            loadGame(currentIndex);
-            toast('🔄 Reset');
+            
+            if (isPlaying && !isPaused) {
+                isPaused = true;
+                isPlaying = false;
+                toast('⏸️ Paused');
+                if (animFrame) {
+                    cancelAnimationFrame(animFrame);
+                    animFrame = null;
+                }
+                drawGameScreen(roms[currentIndex].name);
+            } else if (isPaused) {
+                // Resume
+                isPaused = false;
+                isPlaying = true;
+                toast('▶️ Resumed');
+                startEmulation();
+            } else {
+                toast('Nothing to pause', false);
+            }
         }
 
-        // --- Fullscreen ---
+        function resetEmulation() {
+            if (currentIndex === -1) {
+                toast('No ROM loaded', false);
+                return;
+            }
+            
+            if (animFrame) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
+            }
+            
+            isPlaying = false;
+            isPaused = false;
+            frame = 0;
+            
+            drawGameScreen(roms[currentIndex].name);
+            toast('🔄 Reset');
+            updateStatus(`Reset: ${roms[currentIndex].name}`);
+            
+            // Auto-play after reset
+            setTimeout(() => {
+                if (currentIndex !== -1) {
+                    isPlaying = true;
+                    startEmulation();
+                }
+            }, 500);
+        }
+
+        // --- File handling ---
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            
+            let totalFiles = files.length;
+            let processed = 0;
+            
+            progressBar.classList.add('active');
+            
+            for (let f of files) {
+                const ext = f.name.split('.').pop().toLowerCase();
+                if (!['bin', 'iso', 'img', 'rom'].includes(ext)) {
+                    toast(`⚠️ Skipped "${f.name}" (unsupported format)`, false);
+                    processed++;
+                    updateProgress(processed, totalFiles);
+                    continue;
+                }
+                if (f.size === 0) {
+                    toast(`⚠️ "${f.name}" is empty`, false);
+                    processed++;
+                    updateProgress(processed, totalFiles);
+                    continue;
+                }
+                if (f.size > 4 * 1024 * 1024 * 1024) {
+                    toast(`⚠️ "${f.name}" is too large (max 4GB)`, false);
+                    processed++;
+                    updateProgress(processed, totalFiles);
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const dataURL = e.target.result;
+                        roms.push({
+                            name: f.name,
+                            dataURL: dataURL,
+                            size: f.size
+                        });
+                        processed++;
+                        updateProgress(processed, totalFiles);
+                        renderRomList();
+                        updateStatus(`Ready · ${roms.length} ROMs`);
+                        toast(`✅ "${f.name}" added`);
+                        
+                        // Auto-load first ROM
+                        if (roms.length === 1 && currentIndex === -1) {
+                            setTimeout(() => loadRom(0), 500);
+                        }
+                    } catch(err) {
+                        toast(`❌ Error processing "${f.name}"`, false);
+                        processed++;
+                        updateProgress(processed, totalFiles);
+                    }
+                };
+                reader.onerror = function() {
+                    toast(`❌ Failed to read "${f.name}"`, false);
+                    processed++;
+                    updateProgress(processed, totalFiles);
+                };
+                reader.readAsDataURL(f);
+            }
+        }
+
+        function updateProgress(processed, total) {
+            const percent = (processed / total) * 100;
+            progressFill.style.width = percent + '%';
+            if (processed >= total) {
+                setTimeout(() => {
+                    progressBar.classList.remove('active');
+                    progressFill.style.width = '0%';
+                }, 1000);
+            }
+        }
+
+        // --- Clear all ---
+        function clearAll() {
+            if (roms.length === 0) {
+                toast('No ROMs to clear', false);
+                return;
+            }
+            
+            if (animFrame) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
+            }
+            
+            roms = [];
+            currentIndex = -1;
+            currentRomData = null;
+            isPlaying = false;
+            isPaused = false;
+            frame = 0;
+            
+            playBtn.disabled = true;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            
+            renderRomList();
+            drawPlaceholder('🎮 PS2 Ready');
+            updateStatus('Ready');
+            toast('🗑️ All ROMs cleared');
+        }
+
+        // --- Toggle fullscreen ---
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 canvas.requestFullscreen?.() || canvas.webkitRequestFullscreen?.();
@@ -712,102 +828,98 @@
             }
         }
 
-        // --- Refresh library from GAME_LIBRARY ---
-        function refreshLibrary() {
-            games = GAME_LIBRARY.map(game => ({ ...game }));
-            if (games.length === 0) {
-                toast('⚠️ No games in library', false);
-            } else {
-                toast(`🔄 Library refreshed: ${games.length} games`);
+        // --- Load first ROM ---
+        function loadFirstRom() {
+            if (roms.length === 0) {
+                toast('No ROMs uploaded', false);
+                return;
             }
-            renderGameList();
-            if (currentIndex === -1 && games.length > 0) {
-                loadGame(0);
-            } else if (currentIndex >= games.length) {
-                currentIndex = -1;
-                drawPlaceholder('🎮 Select a Game');
-            }
+            loadRom(0);
         }
 
         // --- Init ---
         function init() {
-            games = GAME_LIBRARY.map(game => ({ ...game }));
-            drawPlaceholder('🎮 Select a Game');
-            renderGameList();
+            drawPlaceholder('🎮 PS2 Ready');
+            renderRomList();
+            updateStatus('Ready');
+            playBtn.disabled = true;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+
+            // Upload button triggers file input
+            uploadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
             
-            if (games.length > 0) {
-                toast(`🎮 ${games.length} games available`);
-                loadGame(0);
-            } else {
-                toast('⚠️ No games in library. Use upload tool to add games.', false);
-            }
+            uploadZone.addEventListener('click', () => fileInput.click());
 
-            // Controls
-            playBtn.addEventListener('click', () => {
-                if (currentIndex === -1) {
-                    toast('Select a game first', false);
-                    return;
-                }
-                isPlaying = true;
-                startLoop();
-                toast('▶️ Playing');
-            });
-
-            pauseBtn.addEventListener('click', () => {
-                isPlaying = false;
-                stopLoop();
-                toast('⏸️ Paused');
-                if (currentIndex !== -1) {
-                    drawGameScreen(games[currentIndex].name);
-                }
-            });
-
-            resetBtn.addEventListener('click', resetCurrent);
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
-            loadFirstBtn.addEventListener('click', () => {
-                if (games.length === 0) {
-                    toast('No games in library', false);
-                    return;
-                }
-                loadGame(0);
-            });
-            refreshBtn.addEventListener('click', refreshLibrary);
-            exportBtn.addEventListener('click', exportLibrary);
-
-            // Upload helper
-            uploadHelperBtn.addEventListener('click', () => isoUpload.click());
-            isoUpload.addEventListener('change', function(e) {
+            // File input change
+            fileInput.addEventListener('change', function(e) {
                 if (this.files && this.files.length > 0) {
-                    const file = this.files[0];
-                    fileInfo.textContent = `📁 ${file.name} (${(file.size / (1024*1024)).toFixed(1)} MB)`;
-                    addGameFromFile(file).catch(err => {
-                        toast(`❌ ${err.message}`, false);
-                    });
+                    handleFiles(this.files);
                 }
                 this.value = '';
             });
+
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            // Controls
+            playBtn.addEventListener('click', startEmulation);
+            pauseBtn.addEventListener('click', pauseEmulation);
+            resetBtn.addEventListener('click', resetEmulation);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            loadFirstBtn.addEventListener('click', loadFirstRom);
+            clearBtn.addEventListener('click', clearAll);
 
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
                 if (e.key === ' ' || e.key === 'Space') {
                     e.preventDefault();
-                    if (isPlaying) pauseBtn.click();
-                    else playBtn.click();
+                    if (!playBtn.disabled) {
+                        if (isPlaying && !isPaused) {
+                            pauseBtn.click();
+                        } else if (isPaused) {
+                            playBtn.click();
+                        } else {
+                            playBtn.click();
+                        }
+                    }
                 }
-                if (e.key === 'r' || e.key === 'R') resetBtn.click();
-                if (e.key === 'f' || e.key === 'F') fullscreenBtn.click();
+                if (e.key === 'r' || e.key === 'R') {
+                    if (!resetBtn.disabled) resetBtn.click();
+                }
+                if (e.key === 'f' || e.key === 'F') {
+                    fullscreenBtn.click();
+                }
             });
 
+            // Double-click canvas to toggle
             canvas.addEventListener('dblclick', () => {
-                if (isPlaying) pauseBtn.click();
-                else playBtn.click();
+                if (!playBtn.disabled) {
+                    if (isPlaying && !isPaused) {
+                        pauseBtn.click();
+                    } else {
+                        playBtn.click();
+                    }
+                }
             });
 
-            // Expose helper functions globally
-            window.addGameFromFile = addGameFromFile;
-            window.addGameFromBase64 = addGameFromBase64;
-            window.exportLibrary = exportLibrary;
-            window.GAME_LIBRARY = GAME_LIBRARY;
+            toast('🎮 Ready! Upload a ROM to start');
         }
 
         init();
